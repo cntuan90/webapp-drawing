@@ -5,9 +5,12 @@ interface CanvasProps {
   socket?: Socket;
   color: string;
   lineWidth: number;
+  isEraser: boolean;
+  isFill: boolean;
+  selectedImage?: string;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ socket, color, lineWidth }) => {
+const Canvas: React.FC<CanvasProps> = ({ socket, color, lineWidth, isEraser, isFill, selectedImage }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
@@ -38,10 +41,23 @@ const Canvas: React.FC<CanvasProps> = ({ socket, color, lineWidth }) => {
 
   useEffect(() => {
     if (ctx) {
-      ctx.strokeStyle = color;
+      ctx.strokeStyle = isEraser ? '#ffffff' : color;
       ctx.lineWidth = lineWidth;
     }
-  }, [color, lineWidth, ctx]);
+  }, [color, lineWidth, ctx, isEraser]);
+
+  useEffect(() => {
+    if (selectedImage && ctx && canvasRef.current) {
+      const img = new Image();
+      img.src = selectedImage;
+      img.onload = () => {
+        const canvas = canvasRef.current!;
+        const x = (canvas.width - img.width) / 2;
+        const y = (canvas.height - img.height) / 2;
+        ctx.drawImage(img, x, y);
+      };
+    }
+  }, [selectedImage, ctx]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -51,17 +67,23 @@ const Canvas: React.FC<CanvasProps> = ({ socket, color, lineWidth }) => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
+    if (isFill) {
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+
     ctx.beginPath();
     ctx.moveTo(x, y);
     setIsDrawing(true);
 
     if (socket) {
-      socket.emit('draw-start', { x, y, color, lineWidth });
+      socket.emit('draw-start', { x, y, color: isEraser ? '#ffffff' : color, lineWidth });
     }
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !ctx || !canvasRef.current) return;
+    if (!isDrawing || !ctx || !canvasRef.current || isFill) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -71,18 +93,23 @@ const Canvas: React.FC<CanvasProps> = ({ socket, color, lineWidth }) => {
     ctx.stroke();
 
     if (socket) {
-      socket.emit('draw-move', { x, y, color, lineWidth });
+      socket.emit('draw-move', { x, y, color: isEraser ? '#ffffff' : color, lineWidth });
     }
   };
 
   const stopDrawing = () => {
-    if (!ctx) return;
+    if (!ctx || isFill) return;
     ctx.closePath();
     setIsDrawing(false);
 
     if (socket) {
       socket.emit('draw-end');
     }
+  };
+
+  const resetCanvas = () => {
+    if (!ctx || !canvasRef.current) return;
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
   };
 
   return (
