@@ -1,0 +1,57 @@
+name: Deploy Drawing App
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Client Dependencies
+      run: npm install
+
+    - name: Build Client
+      run: npm run build
+      env:
+        REACT_APP_SOCKET_URL: ${{ secrets.REACT_APP_SOCKET_URL }}
+
+    - name: Install Server Dependencies
+      working-directory: ./server
+      run: npm install
+
+    - name: Build Server
+      working-directory: ./server
+      run: npm run build
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: build
+        clean: true
+        clean-exclude: |
+          server/
+          .git/
+          .github/
+
+    - name: Deploy Server to Heroku
+      if: github.ref == 'refs/heads/master'
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        working-directory: ./server
+        procfile: "web: npm start" 
