@@ -107,11 +107,6 @@ const Canvas: React.FC<CanvasProps> = ({ socket, color, lineWidth, isEraser, isF
     }
   };
 
-  const resetCanvas = () => {
-    if (!ctx || !canvasRef.current) return;
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-  };
-
   return (
     <canvas
       ref={canvasRef}
