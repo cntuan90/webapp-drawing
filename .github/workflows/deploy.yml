@@ -12,6 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
@@ -21,6 +23,10 @@ jobs:
 
     - name: Install Dependencies
       run: |
+        # Create package-lock.json if it doesn't exist
+        if [ ! -f package-lock.json ]; then
+          npm install
+        fi
         npm install
         npm install gh-pages --save-dev
 
@@ -31,7 +37,11 @@ jobs:
 
     - name: Install Server Dependencies
       working-directory: ./server
-      run: npm install
+      run: |
+        if [ ! -f package-lock.json ]; then
+          npm install
+        fi
+        npm install
 
     - name: Build Server
       working-directory: ./server
