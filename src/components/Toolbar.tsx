@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChromePicker } from 'react-color';
-import { FaPaintBrush, FaEraser, FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
+import { FaPaintBrush, FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
+import './Toolbar.css';
 
 interface ToolbarProps {
   color: string;
@@ -46,45 +47,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
           {isVoiceEnabled ? 'Disable Voice' : 'Enable Voice'}
         </button>
       </div>
-
-      <style jsx>{`
-        .toolbar {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-          padding: 20px;
-          background: #f5f5f5;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .tool-section {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .tool-icon {
-          font-size: 20px;
-        }
-
-        .voice-button {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 16px;
-          border: none;
-          border-radius: 4px;
-          background: #007bff;
-          color: white;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-
-        .voice-button:hover {
-          background: #0056b3;
-        }
-      `}</style>
     </div>
   );
 };
