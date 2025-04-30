@@ -19,8 +19,10 @@ jobs:
         node-version: '18'
         cache: 'npm'
 
-    - name: Install Client Dependencies
-      run: npm install
+    - name: Install Dependencies
+      run: |
+        npm install
+        npm install gh-pages --save-dev
 
     - name: Build Client
       run: npm run build

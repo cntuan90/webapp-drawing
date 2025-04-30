@@ -70,3 +70,9 @@ The application is configured to deploy automatically to GitHub Pages using GitH
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+# Drawing Collaboration App
+
+This branch contains the built version of the application for GitHub Pages deployment.
+
+The main application code can be found in the `master` branch.
